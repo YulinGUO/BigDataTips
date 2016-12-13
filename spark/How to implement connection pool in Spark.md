@@ -78,6 +78,9 @@ rdd.foreachPartition(partitionOfRecords => {
 
 <h3 id="id222">优点分析</h3>
 
+1.不重复创建，销毁跟数据库的连接，效率高。 
+ Spark 每个executor  申请一个JVM进程，task是多线程模型，运行在executor当中。task==partition数目。Object只在每个JVM初始化一次。  
+2.代码design pattern
 
 
 <h3 id="id222">参考资料</h3>
