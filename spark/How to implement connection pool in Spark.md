@@ -14,7 +14,7 @@
     	
  可是如何具体实现呢？ 
   
- <h2 id="id2">scala + Mongodb实现连接池</h2> 
+ <h2 id="id2">Scala + Mongodb实现连接池</h2> 
  一个通常意义上的连接池，能够请求获取资源，也能释放资源。不过MongoDB java driver已经帮我们实现了这一套逻辑。
  
  > 
