@@ -1,7 +1,8 @@
-<h1 id="id1">Spark 内存相关问题</h1>
+<h1 id="id1">Spark 内存相关问题</h1>  
 
 <h2 id="id2">Spark Memory Management Overview</h2> 
-Spark中，内存的使用大致可以分为两类：execution and storage.Execution指的是用于shuffles,joins,sort以及aggregation的内存。而storage指的是用于cache以及分发内部数据到整个cluster的内存。
+Spark内存的使用大致可以分为两类：execution and storage.  
+Execution指的是用于shuffles,joins,sort以及aggregation的内存。而storage指的是用于cache以及分发内部数据到整个cluster的内存。
 
 <h3>1.5版本之前</h3> 
 
