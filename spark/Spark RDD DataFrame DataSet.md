@@ -27,6 +27,31 @@ A DataFrame is a Dataset organized into named columns. It is conceptually equiva
 
 理论上,DatFrame可以看成 DataSet[Row]，不过Row实际在JVM中untyped JVM Object,而DataSet是strong typed JVM Object 的集合。
 
+<h3>DataSet详解</h3>  
+
+![](https://jaceklaskowski.gitbooks.io/mastering-apache-spark/content/images/spark-sql-Dataset.png)   
+
+
+从上图来看， dataset就是 Encoder以及QueryExecution的二元组。跟RDD相同，ds也是lazy,只有当action被执行的时候，query才会执行。实际上，DS是在某些数据源（包含分布式文件系统，HIVE，JDBC）上执行Query expression.而结构化的qe可以是sql query, column-based sql或者scala lamda function.  
+
+
+```
+scala> val dataset = (0 to 4).toDS
+dataset: org.apache.spark.sql.Dataset[Int] = [value: int]
+
+// Variant 1: filter operator accepts a Scala function
+dataset.filter(n => n % 2 == 0).count
+
+// Variant 2: filter operator accepts a Column-based SQL expression
+dataset.filter('value % 2 === 0).count
+
+// Variant 3: filter operator accepts a SQL query
+dataset.filter("value % 2 = 0").count
+
+```
+
+
+
 <h3>DataSet的优点</h3>
 * High-level Api
 * 效率更高，包含空间使用，执行效率。
@@ -34,7 +59,10 @@ A DataFrame is a Dataset organized into named columns. It is conceptually equiva
   DataSet使用Encoders map JVM Objects into Tungsten's 的内存管理，效率更高。
   
   
-<h2 id="id4">三者互相转化</h2> 
+<h2 id="id4">三者关系</h2> 
+<h3>General</h3>  
+```  
+``` 
 <h3>DataSet to RDD</h3>
  ds.rdd  
  df.rdd
