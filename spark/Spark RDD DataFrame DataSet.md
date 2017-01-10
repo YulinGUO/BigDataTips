@@ -61,8 +61,46 @@ dataset.filter("value % 2 = 0").count
   
 <h2 id="id4">三者关系</h2> 
 <h3>General</h3>  
+
 ```  
+import spark.implicits._
+case class Token(name: String, productId: Int, score: Double)
+val data = Seq(Token("aaa", 100, 0.12))
+// Transform data to a Dataset[Token]
+val ds = data.toDS
+// Transform data into a DataFrame with no explicit schema
+val df = data.toDF
+
+// Transform DataFrame into a Dataset
+val ds = df.as[Token]
+
+ds.printSchema
+root
+ |-- name: string (nullable = true)
+ |-- productId: integer (nullable = false)
+ |-- score: double (nullable = false)
+ds.show
++----+---------+-----+
+|name|productId|score|
++----+---------+-----+
+| aaa|      100| 0.12|
+
+// In DataFrames we work with Row instances
+scala> df.map(_.getClass.getName).show(false)
++--------------------------------------------------------------+
+|value                                                         |
++--------------------------------------------------------------+
+|org.apache.spark.sql.catalyst.expressions.GenericRowWithSchema|
+
+// In Datasets we work with case class instances
+scala> ds.map(_.getClass.getName).show(false)
++---------------------------+
+|value                      |
++---------------------------+
+|$line40.$read$$iw$$iw$Token|
+
 ``` 
+
 <h3>DataSet to RDD</h3>
  ds.rdd  
  df.rdd
