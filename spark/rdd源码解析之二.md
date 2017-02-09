@@ -63,14 +63,35 @@ spark2.0之后出现的新的Api,之前为combineByKey。区别在于提供了 c
 * mapSideCombine :默认map端combine
 * partitioner: partitioner
 
-另外，调用此函数，如果传入的partitioner跟PairRDD一样，则不新建ShuffleRDD,反之则新建shuffleRDD。  
 
-ToVerify:   
-mapSideCombine：  
+```
+    if (self.partitioner == Some(partitioner)) {
+      self.mapPartitions(iter => {
+        val context = TaskContext.get()
+        new InterruptibleIterator(context, aggregator.combineValuesByKey(iter, context))
+      }, preservesPartitioning = true)
+    } else {
+      new ShuffledRDD[K, V, C](self, partitioner)
+        .setSerializer(serializer)
+        .setAggregator(aggregator)
+        .setMapSideCombine(mapSideCombine)
+    }
+```
 
+这段代码的逻辑如下：
+
+1. 如果传入的partitioner跟PairRDD一样,则直接调用aggregator.combineValuesByKey,也就是mergeValue函数。  
+2. 如果不同，则新建一个shuffledRDD  
+  2.1 mapSideCombine==false
+      reducer端会调用combineValuesByKey,得到结果
+  2.2 mapSideCombine==true
+      mapper端会先进行map-side-combine,也就是aggregator.combineValuesByKey，然后进行shuffle, 后reducer端会再做一次combine,调用aggregator.combineCombinersByKey。
+
+
+reducer端是如何实现combineCombinersByKey?  
 MapReduce shuffle 阶段就是边 fetch 边使用 combine() 进行处理，只是 combine() 处理的是部分数据。MapReduce 为了让进入 reduce() 的 records 有序，必须等到全部数据都 shuffle-sort 后再开始 reduce()。因为 Spark 不要求 shuffle 后的数据全局有序，因此没必要等到全部数据 shuffle 完成后再处理。那么如何实现边 shuffle 边处理，而且流入的 records 是无序的？答案是使用可以 aggregate 的数据结构，比如 HashMap。每 shuffle 得到（从缓冲的 FileSegment 中 deserialize 出来）一个 <Key, Value> record，直接将其放进 HashMap 里面。如果该 HashMap 已经存在相应的 Key，那么直接进行 aggregate 也就是 func(hashMap.get(Key), Value)。这个 func 功能上相当于 reduce()，但实际处理数据的方式与 MapReduce reduce() 有差别。  
-如果mapSideCombine设置为false,则不会调用mergeCombiners来combine C。
 
+Todo:  
 如何验证？？？
 
 ### 3.2 combineByKey
@@ -141,10 +162,45 @@ groupByKey作用是按照Key来分组，并将key所对应的所有values放到�
 * 现在groupByKey聚合后的结果全部放入内存中，容易导致 OOM
 
 为什么不开启mapSideCombine?  
-mapSideCombine 工作原理：使用 aggregate 的数据结构，比如 HashMap。每 shuffle 得到（从缓冲的 FileSegment 中 deserialize 出来）一个 <Key, Value> record，直接将其放进 HashMap 里面。如果该 HashMap 已经存在相应的 Key，那么直接进行 aggregate 也就是 func(hashMap.get(Key), Value)。  
-从数据总量上来讲，并没有减少shuffled之后的数目(给reduce),并且还要使用另一个hashMap.
+mapSideCombine 工作原理：mapper端先mergeValues,然后reducer端再combineCombiners,具体来说，使用 aggregate 的数据结构，比如 HashMap。每 shuffle 得到（从缓冲的 FileSegment 中 deserialize 出来）一个 <Key, Value> record，直接将其放进 HashMap 里面。如果该 HashMap 已经存在相应的 Key，那么直接进行 aggregate 也就是 func(hashMap.get(Key), Value)。  
+
+mapSideCombine从数据总量上来讲，并没有减少shuffled之后的数目(给reducer,所有的object还是被保存的),并且还要使用另一个hashMap来combineCombiners。
 
 
 ## 4.注意的问题
 
+###4.1 foldByKey, aggregateByKey zeroValue的问题
+为什么说zeroValue一定要选择对结果无影响的初始值呢？请看下面两组代码.  
 
+```
+scala> val people = List(("Mobin", 2), ("Mobin", 1), ("Lucy", 2), ("Amy", 1), ("Lucy", 3))
+people: List[(String, Int)] = List((Mobin,2), (Mobin,1), (Lucy,2), (Amy,1), (Lucy,3))
+
+scala>  val rdd = sc.parallelize(people)
+rdd: org.apache.spark.rdd.RDD[(String, Int)] = ParallelCollectionRDD[0] at parallelize at <console>:26
+
+//结果1  
+scala>     val foldByKeyRDD = rdd.foldByKey(2)(_+_).collect.foreach(println)
+(Mobin,7)
+(Amy,3)
+(Lucy,9)
+
+scala> import org.apache.spark.HashPartitioner
+import org.apache.spark.HashPartitioner
+
+scala> val rdd = sc.parallelize(people).partitionBy(new HashPartitioner(2))
+rdd: org.apache.spark.rdd.RDD[(String, Int)] = ShuffledRDD[4] at partitionBy at <console>:27
+
+//结果2
+scala>   rdd.foldByKey(2)(_+_).collect.foreach(println)
+(Amy,3)
+(Mobin,5)
+(Lucy,7)
+
+```
+为啥两次结果不同？第二次就多了个 hashPartitioner啊。  
+实际上，从源码角度来讲，zeroValue是会作用于每个partition，sc.parallelize(people)不能保证同样的key对应的值落到同样的partition,所以每个partition中的每个key都会加zeroValue。
+
+## 5. 参考  
+旧版本spark <http://www.cnblogs.com/fxjwind/p/3489111.html>  
+spark 2.10源码
