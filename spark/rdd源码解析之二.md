@@ -126,15 +126,6 @@ combineByKeyWithClassTag[V]((v: V) => v, func, func, partitioner)
 ```
 def groupByKey(partitioner: Partitioner): RDD[(K, Iterable[V])]
 ```
-
-
-   *
-   * Note: This operation may be very expensive. If you are grouping in order to perform an
-   * aggregation (such as a sum or average) over each key, using [[PairRDDFunctions.aggregateByKey]]
-   * or [[PairRDDFunctions.reduceByKey]] will provide much better performance.
-   *
-   * Note: As currently implemented, groupByKey must be able to hold all the key-value pairs for any
-   * key in memory. If a key has too many values, it can result in an [[OutOfMemoryError]].
    
 groupByKey作用是按照Key来分组，并将key所对应的所有values放到一个sequence里面。  
 
@@ -152,4 +143,8 @@ groupByKey作用是按照Key来分组，并将key所对应的所有values放到�
 为什么不开启mapSideCombine?  
 mapSideCombine 工作原理：使用 aggregate 的数据结构，比如 HashMap。每 shuffle 得到（从缓冲的 FileSegment 中 deserialize 出来）一个 <Key, Value> record，直接将其放进 HashMap 里面。如果该 HashMap 已经存在相应的 Key，那么直接进行 aggregate 也就是 func(hashMap.get(Key), Value)。  
 从数据总量上来讲，并没有减少shuffled之后的数目(给reduce),并且还要使用另一个hashMap.
+
+
+## 4.注意的问题
+
 
