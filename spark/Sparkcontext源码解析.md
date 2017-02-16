@@ -24,6 +24,8 @@ sparkContext中包含很多有用的类的实例，其中对于调度执行程�
 
 Spark把整个DAG抽象层从实际的task执行中剥离了出来DAGScheduler, 负责解析spark命令,生成stage, 形成DAG, 最终划分成tasks, 提交给TaskScheduler。这样设计的好处, 就是Spark可以通过提供不同的TaskScheduler简单的支持各种资源调度和执行平台。
 
+
+
 ## 2. 函数
 
 ### 2.1 parallize
