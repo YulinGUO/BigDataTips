@@ -57,6 +57,7 @@ dataset.filter("value % 2 = 0").count
 * 效率更高，包含空间使用，执行效率。
   Spark SQL engine使用Catalyst执行Query,会有优化效果。
   DataSet使用Encoders map JVM Objects into Tungsten's 的内存管理，效率更高。
+*  Spark SQL，调用spark.catalog.cacheTable("tableName") or dataFrame.cache()就能够把table cache到内存的列模式中。这样Spark Sql只需要scan需要的列，并且能够自动压缩数据(减少内存使用，GC压力)
   
   
 <h2 id="id4">三者关系</h2> 
