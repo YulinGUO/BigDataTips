@@ -62,6 +62,13 @@ $$x_u=(Y^{\top}Y + \lambda I)^{-1}Y^\top r_u
 $$
 ###spark 分布式实现
 参考链接<https://cloud.tencent.com/developer/article/1005504>
+###错误debug
+如果出现Stackoverflow错误，需要设置checkpoint
+spark.sparkContext.setCheckpointDir("hdfs://Path")
+
+Checkpointing helps with recovery (when nodes fail) and StackOverflow exceptions caused by long lineage. It also helps with eliminating temporary shuffle files on disk, which can be important when there are many ALS iterations.
+###优化
+spark2.2中最新的recommend for user做了很大的提升，在之前的版本中，为了求TopN,是使用userfactor crossjoin itemfactor,计算效率很差。最新的版本中是先分块求得TopN,然后利用TopByKeyAggregator计算全局TopN。计算效率大大提升。
 ##参考
 <http://blog.csdn.net/buptfanrq/article/details/72885760>
 <https://en.wikipedia.org/wiki/Matrix_calculus#Scalar-by-vector_identities>
