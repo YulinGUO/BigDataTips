@@ -55,5 +55,16 @@ JVM executor memory 分两部分
    解决：
 
 	spark.driver.extraJavaOptions -XX:PermSize=128M -XX:MaxPermSize=256M
-   
+	
+2. Running beyond physical memory limits,killed by yarn
+这个问题是说Yarn需要更多的虚拟内存，但是Yarn根据你spark executor memory计算得到的虚拟内存小于实际需要的，所以被killed。
+解决方案：
+在Yarn-site.xml中设置：
+`
+<property>
+    <name>yarn.nodemanager.vmem-pmem-ratio</name>
+    <value>2.5</value>
+</property>
+` 
+另外，也可以从JVM优化角度进行，减少虚拟内存的使用。
 
