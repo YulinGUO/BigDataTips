@@ -32,6 +32,11 @@ $$\hat{c_m}=mean(y|x\in R_m)$$
 3.对得到的两个子区域递归调用1，2步骤
 4.输入空间划分为K个部分，$R_1,R_2,...,R_K$,并且每个输入空间上都有一个固定的输出$C_K$,那么回归树模型可以表示为:
 $$f(x) = \sum_{k=1}^K C_k I(x\in R_k)$$
+
+终止条件:
+1.num of leaves
+2.Tree depth
+3.num of instances in current node
 ###参考
 [博客1](http://blog.csdn.net/xierhacker/article/details/64439601)
 

@@ -1,11 +1,13 @@
 <h1>GBDT</h1>
 
 <h2>介绍</h2>
-Gradient Boost Decision Tree,是一个应用很广泛的算法,可以用来做分类、回归。最近在各种竞赛中取得了不错的效果，这个算法还有一些其他的名字，比如说MART(Multiple Additive Regression Tree)，GBRT(Gradient Boost Regression Tree)，Tree Net等，发明者是Friedman。  
-跟传统的Boost方法不同(比如AdaBoost),AdaBoost是为每个样本附上一个权重值，在每一步训练中，增加分类错误的样本的权重。再进行下一步迭代。最后讲这些弱分类器组合起来，得到一个强分类器。  
-而Gradient Boost与传统的Boost的区别是，每一次的计算是为了减少上一次的残差(residual)，而为了消除残差，我们可以在残差减少的梯度(Gradient)方向上建立一个新的模型。所以说，在Gradient Boost中，每个新的模型的建立是为了使得之前模型的残差往梯度方向减少，与传统Boost对正确、错误的样本进行加权有着很大的区别。GB利用最速下降的近似方法，即利用损失函数的负梯度在当前模型的值，作为回归问题中提升树算法的残差的近似值，拟合一个回归树。（注：鄙人私以为，与其说负梯度作为残差的近似值，不如说残差是负梯度的一种特例）
+Gradient Boost Decision Tree,是一个应用很广泛的算法,可以用来做分类、回归。最近在各种竞赛中取得了不错的效果，这个算法还有一些其他的名字，比如说MART(Multiple Additive Regression Tree)，GBRT(Gradient Boost Regression Tree)，Tree Net等，发明者是Friedman.   
 
-<h2>算法详解</h2>
+
+
+<h2>Boosting Decision Tree：提升树算法</h2>
+跟传统的Boost方法不同(比如AdaBoost),AdaBoost是为每个样本附上一个权重值，在每一步训练中，增加分类错误的样本的权重。再进行下一步迭代。最后将这些弱分类器组合起来，得到一个强分类器。  
+而Boost Tree与传统的Boost的区别是，每一次的计算是为了减少上一次的残差(residual)，而为了消除残差，我们可以在残差减少的梯度(Gradient)方向上建立一个新的模型。所以说，在Boost中，每个新的模型的建立是为了使得之前模型的残差往梯度方向减少，与传统Boost对正确、错误的样本进行加权有着很大的区别。GB利用最速下降的近似方法，即利用损失函数的负梯度在当前模型的值，作为回归问题中提升树算法的残差的近似值，拟合一个回归树。（注：鄙人私以为，与其说负梯度作为残差的近似值，不如说残差是负梯度的一种特例）
 
 假设对于一个样本x，它可能属于K个分类，其估计值分别为F1(x)…FK(x)，Logistic变换如下，logistic变换是一个平滑且将数据规范化（使得向量的长度为1）的过程，结果为属于类别k的概率pk(x)
 
@@ -65,3 +67,4 @@ Gradient Boost Decision Tree,是一个应用很广泛的算法,可以用来做�
 [机器学习中的算法(1)-决策树模型组合之随机森林与GBDT](http://www.cnblogs.com/LeftNotEasy/archive/2011/03/07/1976562.html)  
 [梯度提升树(GBDT)原理小结](http://www.cnblogs.com/pinard/p/6140514.html)
   
+
