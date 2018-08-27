@@ -1,6 +1,6 @@
 ## CART
 ###概念
-CART,值得是Classification And Regression Tree的缩写。由于能够分类，也能回归，所以作为弱分类(回归)器，在RF,以及GBDT中得到广泛的使用。
+CART,指的是Classification And Regression Tree的缩写。由于能够分类，也能回归，所以作为弱分类(回归)器，在RF,以及GBDT中得到广泛的使用。
 假设我们有数据集D,X和Y分别是输入和输出变量，其中Y是连续变量(回归模型)，D可以表示为$D=\{(x^1,y^1),(x^2,y^2),...,(x^m,y^m) \} $,m为数据集的大小。
 >一个回归树本质代表着一个被划分的输入空间和这些划分的输入空间上的各自取值。
 
