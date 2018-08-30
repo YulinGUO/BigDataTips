@@ -94,6 +94,20 @@
 可以看到，里面是按照ida进行partition的，然后res的记录数是随着遍历的ida慢慢变多了。
 这样以后，我们只要取每条记录的最后一条记录就好，groupby 以及max可以帮忙实现这个。
 
+如果，你想限制最后结果中，list的个数呢？当然，也是要按照得分从低到高取。 
+
+```
+    val filterRange = 2
+    val rankedData =data.withColumn("rank", dense_rank.over(w))
+        .filter(col("rank") leq filterRange)
+
+    rankedData.withColumn("nn", struct(col("idb"), col("distance")).as[ItemB])
+      .withColumn("res", collect_list("nn").over(w))
+      .groupBy(col("ida"))
+      .agg(max(col("res")).as("res"))
+```
+首先使用dense_rank排序得到序号，然后按照序号过滤。
+
 
 
 
